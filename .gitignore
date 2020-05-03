@@ -1,11 +1,13 @@
-CMakeLists.txt.user
-CMakeCache.txt
-CMakeFiles
-CMakeScripts
-Testing
-Makefile
-cmake_install.cmake
-install_manifest.txt
-compile_commands.json
-CTestTestfile.cmake
-_deps
+### Directories ###
+
+# Build products
+build/
+build-*/
+
+# Scratch space
+scratch/
+
+### Files ###
+
+# Sublime Text
+*.sublime-workspace
