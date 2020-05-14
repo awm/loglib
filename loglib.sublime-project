@@ -4,5 +4,54 @@
 		{
 			"path": "."
 		}
-	]
+	],
+    "build_systems":
+    [
+        {
+            "name": "CMake (Ninja)",
+            "cmd": [
+                "bash",
+                "-c",
+                "mkdir -p build/ninja && cd build/ninja && cmake -G Ninja ../.. && ninja"
+            ],
+            "file_regex": "^.*/(inc/.*?|src/.*?|test/.*?):([0-9]+):?([0-9]*): (.*)",
+            "working_dir": "$project_path",
+
+            "variants": [
+                {
+                    "name": "Clean",
+                    "cmd": [
+                        "bash",
+                        "-c",
+                        "rm -vRf build/ninja"
+                    ]
+                },
+                {
+                    "name": "Test",
+                    "cmd": [
+                        "bash",
+                        "-c",
+                        "cd build/ninja && ctest -V"
+                    ],
+                }
+            ]
+        },
+        {
+            "name": "CMake (MSVC)",
+            "cmd": "scripts\\setup.bat && cmake ..\\.. && devenv Project.sln /build Debug",
+            "file_regex": "^.*\\\\(inc\\\\.*?|src\\\\.*?|test\\\\.*?)\\(([0-9]+)\\): ()(.*)",
+            "working_dir": "$project_path",
+
+            "variants": [
+                {
+                    "name": "Clean",
+                    "shell_cmd": "RMDIR /S /Q build\\msvc"
+                },
+                {
+                    "name": "Test",
+                    "cmd": "scripts\\setup.bat && ctest -V"
+                }
+            ]
+        }
+    ]
 }

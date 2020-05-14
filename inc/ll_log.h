@@ -19,6 +19,8 @@
  *  Initialiser for a log structure.
  *
  *  @param  name    Log name string.
+ *  @param  prefix  Prefix to prepend to each log message.  Not currently implemented.  Set to NULL
+ *                  for the default.
  *  @param  level   Default log threshold.
  *  @param  parent  Parent log instance.  Set to NULL if there is no parent.
  *  @param  targets Linked list of log targets to write messages to.  Set to LL_INHERIT_TARGET to
@@ -26,11 +28,11 @@
  *
  *  Example:
  *  @code
- *  static struct ll_log MyLog = LL_LOG_INIT("mylog", LL_LEVEL_INFO, NULL, &PrintfTarget);
+ *  static struct ll_log MyLog = LL_LOG_INIT("mylog", NULL, LL_LEVEL_INFO, NULL, &PrintfTarget);
  *  @endcode
  */
-#define LL_LOG_INIT(name, level, parent, targets) \
-    { (parent), NULL, NULL, (name), (level), (targets) }
+#define LL_LOG_INIT(name, prefix, level, parent, targets) \
+    { (parent), NULL, NULL, (name), (prefix), (level), (targets) }
 
 /**
  *  Write a message to a log at the specified level, using positional parameters.

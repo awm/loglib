@@ -46,13 +46,15 @@ struct ll_target
  */
 struct ll_log
 {
-    struct ll_log   *parent;    ///< Parent log instance.
-    struct ll_log   *next;      ///< Next sibling log instance.
-    struct ll_log   *children;  ///< Child log instances.
+    struct ll_log       *parent;    ///< Parent log instance.
+    struct ll_log       *next;      ///< Next sibling log instance.
+    struct ll_log       *children;  ///< Child log instances.
 
-    const char           *name;     ///< Name of this log instance.
-    enum ll_level         level;    ///< Threshold below which to pass log messages.
-    struct ll_target    **targets;  ///< Target(s) to write log messages to.
+    const char          *name;      ///< Name of this log instance.
+    const char          *prefix;    ///< Prefix to prepend to each log message.  Not currently
+                                    ///< implemented.
+    enum ll_level        level;     ///< Threshold below which to pass log messages.
+    struct ll_target    *targets;   ///< Target(s) to write log messages to.
 };
 
 /**

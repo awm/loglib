@@ -29,6 +29,25 @@ enum ll_level
                         ///< parent.
 };
 
+/**
+ *  Convert an enum ll_level value into a string suitable for display in a log message.  This must
+ *  support all listed enum values.  No value less than 0 or greater than or equal to
+ *  LL_LEVEL_INHERIT will be passed to this macro, allowing the mapping to be efficiently
+ *  implemented using an array.
+ *
+ *  @param level    Level value.
+ *
+ *  @return Constant string representation if the log level.  To maintain the best formatting, it is
+ *          recommended that this be four or fewer characters.
+ */
+#define LL_LEVEL_NAME(level)    (_ll_log_level_name[level])
+
+/// Default mapping of level value to name.
+extern const char *_ll_log_level_name[LL_LEVEL_INHERIT];
+
+/// Ensure the default mapping is enabled.
+#define LL_DEFAULT_LEVEL_MAPPING 1
+
 /// Log statements with a level greater than this will be omitted entirely and cannot be turned on
 /// or off dynamically.
 #define LL_STATIC_MAX_LEVEL LL_LEVEL_DEBUG
