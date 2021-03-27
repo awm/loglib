@@ -1,5 +1,8 @@
 # loglib
 
+![GitHub](https://img.shields.io/github/license/awm/loglib)
+![Quality](https://img.shields.io/badge/quality-unstable-red)
+
 A configurable, embeddable logging framework.
 
 ## Initial Target Features
