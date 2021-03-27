@@ -26,8 +26,7 @@ configure_file(ll_features.h.in include/ll_features.h NEWLINE_STYLE UNIX)
 
 # Set include paths for library.
 include_directories(
-    ${CMAKE_SOURCE_DIR}/inc
-    ${CMAKE_SOURCE_DIR}/src
+    ${CMAKE_SOURCE_DIR}/include
     ${CMAKE_CURRENT_BINARY_DIR}/include
 )
 

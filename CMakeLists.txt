@@ -23,8 +23,8 @@ elseif (MSVC)
 endif()
 
 # Add subdirectories.
-add_subdirectory(src)
-# add_subdirectory(doc)
+add_subdirectory(source)
+# add_subdirectory(documentation)
 # if (BUILD_TESTING)
 #     add_subdirectory(test)
 # endif()
