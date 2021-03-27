@@ -2,6 +2,7 @@
 
 ![GitHub](https://img.shields.io/github/license/awm/loglib)
 ![Quality](https://img.shields.io/badge/quality-unstable-red)
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/awm/loglib/CMake)
 
 A configurable, embeddable logging framework.
 
