@@ -27,19 +27,28 @@ LL_DEFINE_INLINE void _ll_log
 (
     struct ll_log   *log,
     enum ll_level    level,
+#if LL_LOCATION
     const char      *source,
     unsigned int     line,
+#endif /* end LL_LOCATION */
     const char      *format,
     ...
 );
 
 #if LL_TIMESTAMP
+/**
+ * Write a formatted timestamp into a buffer.
+ *
+ * @retval  NULL        Operation was successful and the timestamp was written to the buffer.
+ * @retval  non-NULL    An error occured.  The returned value is a constant string describing the
+ *                      error.
+ */
 static const char *write_timestamp
 (
-    char             *buffer,
-    time_t           *seconds,
-    unsigned long    *microseconds,
-    size_t           *space
+    char             *buffer,       ///< [out]    Buffer to write the formatted timestamp into.
+    time_t           *seconds,      ///< [out]    Time since the Epoch, in seconds.
+    unsigned long    *microseconds, ///< [out]    Fraction of a second, in microseconds.
+    size_t           *space         ///< [in,out] Available space remaining in the buffer.
 )
 {
     int              n;
@@ -75,29 +84,42 @@ static const char *write_timestamp
 #endif /* end LL_TIMESTAMP */
 
 #if !LL_CUSTOM_FORMAT
+/**
+ * Produce a log message using a standard, built-in format.
+ *
+ * Message format is the following.  Square brackets indicate optional portions of the message,
+ * determined by the library configuration.
+ * @code{.unparsed}
+ * [YYYY-MM-DD HH:MM:SS.mmm ]LEVL [file:line ]logger.name: Formatted log message
+ * @endcode
+ *
+ * @retval  NULL        Operation was successful and the message was written to the buffer.
+ * @retval  non-NULL    An error occured.  The returned value is a constant string describing the
+ *                      error.
+ */
 static const char *standard_format
 (
-    struct ll_log   *log,
-    char            *buffer,
-    time_t          *seconds,
-    unsigned long   *microseconds,
-    const char      *source,
-    unsigned int     line,
-    enum ll_level    level,
-    const char      *format,
-    va_list          args
+    const struct ll_log *log,           ///< [in]  Log instance.
+    char                *buffer,        ///< [out] Buffer to write log message into.
+#if LL_TIMESTAMP
+    time_t              *seconds,       ///< [out] Timestamp time since the Epoch, in seconds.
+    unsigned long       *microseconds,  ///< [out] Timestamp fraction of a second, in microseconds.
+#endif /* end LL_TIMESTAMP */
+#if LL_LOCATION
+    const char          *source,        ///< [in]  Log message source file name.
+    unsigned int         line,          ///< [in]  Log message line number.
+#endif /* end LL_LOCATION */
+    enum ll_level        level,         ///< [in]  Log level.
+    const char          *format,        ///< [in]  Format string for log message.
+    va_list              args           ///< [in]  Positional parameters for format string.
 )
 {
-    const char  *err = NULL;
-    int          n;
-    size_t       space = LL_MAX_MESSAGE_SIZE;
-
-    // Message format is the following.  Square brackets indicate optional portions of the message.
-    // [YYYY-MM-DD HH:MM:SS.mmm ]LEVL [file:line ]logger.name: Formatted log message
+    int     n;
+    size_t  space = LL_MAX_MESSAGE_SIZE;
 
     // First, write the timestamp into the buffer, if so configured.
 #if LL_TIMESTAMP
-    err = write_timestamp(buffer, seconds, microseconds, &space);
+    const char *err = write_timestamp(buffer, seconds, microseconds, &space);
     if (err != NULL)
     {
         return err;
@@ -155,8 +177,10 @@ void _ll_logv
 (
     struct ll_log   *log,
     enum ll_level    level,
+#if LL_LOCATION
     const char      *source,
     unsigned int     line,
+#endif /* end LL_LOCATION */
     const char      *format,
     va_list          args
 )
@@ -174,14 +198,28 @@ void _ll_logv
         return;
     }
     assert(format != NULL);
+#if LL_LOCATION
     assert(source != NULL);
+#endif
 
     LL_ALLOCATE_BUFFER(buffer, LL_MAX_MESSAGE_SIZE);
 
 #if LL_CUSTOM_FORMAT
 #   error Custom format specifiers are not currently supported!
 #else /* !LL_CUSTOM_FORMAT */
-    err = standard_format(log, buffer, &seconds, &microseconds, source, line, level, format, args);
+    err = standard_format(  log,
+                            buffer,
+#   if LL_TIMESTAMP
+                            &seconds,
+                            &microseconds,
+#   endif /* end LL_TIMESTAMP */
+#   if LL_LOCATION
+                            source,
+                            line,
+#   endif /* end LL_LOCATION */
+                            level,
+                            format,
+                            args);
     if (err != NULL)
     {
         goto end;
@@ -205,6 +243,10 @@ end:
 
     if (err != NULL)
     {
+#if LL_LOCATION
         post_error(err, source, line);
+#else
+        post_error(err);
+#endif
     }
 }

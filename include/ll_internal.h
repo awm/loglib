@@ -107,8 +107,10 @@ void _ll_logv
 (
     struct ll_log   *log,       ///< Log handle.
     enum ll_level    level,     ///< Level of log message.
+#if LL_LOCATION
     const char      *source,    ///< Source file of log statement.
     unsigned int     line,      ///< Source line number of log statement.
+#endif /* end LL_LOCATION */
     const char      *format,    ///< Message format string.  This must be a string literal.
     va_list          args       ///< Positional parameters of format string.
 );
@@ -120,15 +122,24 @@ LL_DECLARE_INLINE void _ll_log
 (
     struct ll_log   *log,       ///< Log handle.
     enum ll_level    level,     ///< Level of log message.
+#if LL_LOCATION
     const char      *source,    ///< Source file of log statement.
     unsigned int     line,      ///< Source line number of log statement.
+#endif /* end LL_LOCATION */
     const char      *format,    ///< Message format string.  This must be a string literal.
     ...                         ///< Positional parameters of format string.
 )
 {
     va_list args;
     va_start(args, format);
-    _ll_logv(log, level, source, line, format, args);
+    _ll_logv(   log,
+                level,
+#if LL_LOCATION
+                source,
+                line,
+#endif /* end LL_LOCATION */
+                format,
+                args);
     va_end(args);
 }
 
@@ -142,8 +153,10 @@ void _ll_clogv
 (
     struct ll_log   *log,       ///< Log handle.
     enum ll_level    level,     ///< Level of log message.
+#if LL_LOCATION
     const char      *source,    ///< Source file of log statement.
     unsigned int     line,      ///< Source line number of log statement.
+#endif /* end LL_LOCATION */
     ll_hash_t        hash,      ///< Compile-time hash of format string.
     va_list          args       ///< Positional parameters of format string.
 );
@@ -158,15 +171,24 @@ LL_DECLARE_INLINE void _ll_clog
 (
     struct ll_log   *log,       ///< Log handle.
     enum ll_level    level,     ///< Level of log message.
+#if LL_LOCATION
     const char      *source,    ///< Source file of log statement.
     unsigned int     line,      ///< Source line number of log statement.
+#endif /* end LL_LOCATION */
     ll_hash_t        hash,      ///< Compile-time hash of format string.
     ...                         ///< Positional parameters of format string.
 )
 {
     va_list args;
     va_start(args, hash);
-    _ll_clogv(log, level, source, line, hash, args);
+    _ll_clogv(  log,
+                level,
+#if LL_LOCATION
+                source,
+                line,
+#endif /* end LL_LOCATION */
+                hash,
+                args);
     va_end(args);
 }
 
@@ -203,20 +225,38 @@ LL_DECLARE_INLINE void _ll_clog
  * @param  ...     Positional parameters of format string.
  */
 
-#if LL_COMPACT
-#   define __LL_LOG(log, level, format, ...)                                    \
-        ((#__VA_ARGS__[0] == '\0')                                          ?   \
-            _ll_clog((log), (level), __FILE__, __LINE__, LL_HASH(format))   :   \
-            _ll_clog((log), (level), __FILE__, __LINE__, LL_HASH(format), __VA_ARGS__))
-#   define __LL_LOGV(log, level, format, args) \
-        _ll_clogv((log), (level), __FILE__, __LINE__, LL_HASH(format), (args))
-#else /* !LL_COMPACT */
-#   define __LL_LOG(log, level, format, ...)                            \
-        ((#__VA_ARGS__[0] == '\0')                                  ?   \
-            _ll_log((log), (level), __FILE__, __LINE__, (format))   :   \
-            _ll_log((log), (level), __FILE__, __LINE__, (format), __VA_ARGS__))
-#   define __LL_LOGV(log, level, format, args) \
-        _ll_logv((log), (level), __FILE__, __LINE__, (format), (args))
-#endif /* end !LL_COMPACT */
+#if LL_LOCATION
+#   if LL_COMPACT
+#      define __LL_LOG(log, level, format, ...)                                    \
+           ((#__VA_ARGS__[0] == '\0')                                          ?   \
+               _ll_clog((log), (level), __FILE__, __LINE__, LL_HASH(format))   :   \
+               _ll_clog((log), (level), __FILE__, __LINE__, LL_HASH(format), __VA_ARGS__))
+#      define __LL_LOGV(log, level, format, args) \
+           _ll_clogv((log), (level), __FILE__, __LINE__, LL_HASH(format), (args))
+#   else /* !LL_COMPACT */
+#      define __LL_LOG(log, level, format, ...)                            \
+           ((#__VA_ARGS__[0] == '\0')                                  ?   \
+               _ll_log((log), (level), __FILE__, __LINE__, (format))   :   \
+               _ll_log((log), (level), __FILE__, __LINE__, (format), __VA_ARGS__))
+#      define __LL_LOGV(log, level, format, args) \
+           _ll_logv((log), (level), __FILE__, __LINE__, (format), (args))
+#   endif /* end !LL_COMPACT */
+#else /* !LL_LOCATION */
+#   if LL_COMPACT
+#      define __LL_LOG(log, level, format, ...)                 \
+           ((#__VA_ARGS__[0] == '\0')                       ?   \
+               _ll_clog((log), (level), LL_HASH(format))    :   \
+               _ll_clog((log), (level), LL_HASH(format), __VA_ARGS__))
+#      define __LL_LOGV(log, level, format, args) \
+           _ll_clogv((log), (level), LL_HASH(format), (args))
+#   else /* !LL_COMPACT */
+#      define __LL_LOG(log, level, format, ...)         \
+           ((#__VA_ARGS__[0] == '\0')               ?   \
+               _ll_log((log), (level), (format))    :   \
+               _ll_log((log), (level), (format), __VA_ARGS__))
+#      define __LL_LOGV(log, level, format, args) \
+           _ll_logv((log), (level), (format), (args))
+#   endif /* end !LL_COMPACT */
+#endif /* end !LL_LOCATION */
 
 #endif /* end LL_INTERNAL_H */

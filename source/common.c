@@ -90,6 +90,7 @@ struct ll_target *get_targets(struct ll_log *log, struct ll_log **owner)
 }
 
 ///  Display an error from the logging system itself.
+#if LL_LOCATION
 void post_error(const char *error, const char *source, unsigned int line)
 {
     assert(error != NULL);
@@ -100,3 +101,10 @@ void post_error(const char *error, const char *source, unsigned int line)
     }
     fprintf(stderr, "\n[loglib error] %s:%u %s\n", source, line, error);
 }
+#else
+void post_error(const char *error)
+{
+    assert(error != NULL);
+    fprintf(stderr, "\n[loglib error] %s\n", error);
+}
+#endif
