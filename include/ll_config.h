@@ -41,7 +41,7 @@ enum ll_level
  *
  * @param   level   Level value.
  *
- * @return  Constant string representation if the log level.  To maintain the best formatting, it is
+ * @return  Constant string representation of the log level.  To maintain the best formatting, it is
  *          recommended that this be four or fewer characters.
  */
 #define LL_LEVEL_NAME(level)    (_ll_log_level_name[level])

@@ -6,9 +6,11 @@
  *
  * @brief       Port implementation to obtain time on POSIX platforms.
  */
-#include "gettime.h"
+#include "ll_internal.h"
 
 #if LL_TIMESTAMP
+#   include "gettime.h"
+
 #   if HAVE_GETTIMEOFDAY
 
 /// Shared implementation if _ll_get_time is not inlined.

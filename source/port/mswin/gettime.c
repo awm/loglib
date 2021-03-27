@@ -6,9 +6,11 @@
  *
  * @brief       Port implementation to obtain time on Windows platforms.
  */
-#include "gettime.h"
+#include "ll_internal.h"
 
 #if LL_TIMESTAMP
+#   include "gettime.h"
+
 #   if HAVE__FTIME_S
 
 /// Shared implementation if _ll_get_time is not inlined.

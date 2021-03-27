@@ -6,9 +6,11 @@
  *
  * @brief       Mutex port implementation for Windows platforms.
  */
-#include "mutex.h"
+#include "ll_internal.h"
 
 #if LL_THREADING
+#   include "mutex.h"
+
 #   if HAVE_MSWIN_INIT_ONCE && HAVE_MSWIN_CRITICAL_SECTION
 
 /// Shared implementation if _ll_lock_mutex is not inlined.
