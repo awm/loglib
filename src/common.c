@@ -1,9 +1,11 @@
 /**
- *  @file common.c
+ * @file        common.c
+ * @copyright   2021 Andrew MacIsaac
+ * @remark
+ *      SPDX-License-Identifier: BSD-2-Clause
  *
- *  Common functions used by the logger implementations.
+ * @brief       Common functions used by the logger implementations.
  */
-
 #include "common.h"
 
 #include <assert.h>
@@ -96,5 +98,5 @@ void post_error(const char *error, const char *source, unsigned int line)
     {
         source = "<unknown>";
     }
-    fprintf(stderr, "[loglib error] %s:%u %s\n", source, line, error);
+    fprintf(stderr, "\n[loglib error] %s:%u %s\n", source, line, error);
 }

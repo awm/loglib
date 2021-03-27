@@ -1,6 +1,6 @@
 BSD 2-Clause License
 
-Copyright (c) 2020, Andrew MacIsaac
+Copyright (c) 2021, Andrew MacIsaac
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without

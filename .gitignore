@@ -7,7 +7,12 @@ build-*/
 # Scratch space
 scratch/
 
+# Editors
+.vscode/
+
 ### Files ###
 
-# Sublime Text
+# Editors
+*.code-workspace
+*.sublime-project
 *.sublime-workspace

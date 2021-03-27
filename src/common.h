@@ -1,16 +1,37 @@
 /**
- *  @file common.h
+ * @file        common.h
+ * @copyright   2021 Andrew MacIsaac
+ * @remark
+ *      SPDX-License-Identifier: BSD-2-Clause
  *
- *  Common functions used by the logger implementations.
+ * @brief       Common functions used by the logger implementations.
  */
-
 #ifndef COMMON_H_
 #define COMMON_H_
 
 #include "ll_internal.h"
 
-#define LOCK(l)
-#define UNLOCK(l)
+#include "port.h"
+
+/**
+ * @def LOCK
+ * Lock a logger instance, if supported.
+ *
+ * @param   logptr  Logger instance pointer.
+ */
+/**
+ * @def UNLOCK
+ * Unlock a logger instance, if supported.
+ *
+ * @param   logptr  Logger instance pointer.
+ */
+#if LL_THREADING
+#   define LOCK(logptr)     LL_LOCK(&(logptr)->mutex)
+#   define UNLOCK(logptr)   LL_UNLOCK(&(logptr)->mutex)
+#else /* !LL_THREADING */
+#   define LOCK(logptr)
+#   define UNLOCK(logptr)
+#endif /* end !LL_THREADING */
 
 /**
  *  Get the the threshold level below which a log's messages should be displayed.

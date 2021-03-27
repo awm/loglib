@@ -1,0 +1,48 @@
+/**
+ * @file        ll_features.h
+ * @copyright   2021 Andrew MacIsaac
+ * @remark
+ *      SPDX-License-Identifier: BSD-2-Clause
+ *
+ * @brief       Loglib feature detection for default configuration.
+ */
+#ifndef LL_FEATURES_H_
+#define LL_FEATURES_H_
+
+/// FreeRTOS dynamically allocated semaphores available?
+#cmakedefine01 HAVE_FREERTOS_SEMAPHORE
+
+/// FreeRTOS statically allocated semaphores available?
+#cmakedefine01 HAVE_FREERTOS_STATIC_SEMAPHORE
+
+/// FreeRTOS xTaskGetSchedulerState() available?
+#cmakedefine01 HAVE_FREERTOS_XTASKGETSCHEDULERSTATE
+
+/// POSIX gettimeofday() available?
+#cmakedefine01 HAVE_GETTIMEOFDAY
+
+/// POSIX gmtime_r() available?
+#cmakedefine01 HAVE_GMTIME_R
+
+/// Windows gmtime_s() available?
+#cmakedefine01 HAVE_GMTIME_S
+
+/// POSIX localtime_r() available?
+#cmakedefine01 HAVE_LOCALTIME_R
+
+/// Windows localtime_s() available?
+#cmakedefine01 HAVE_LOCALTIME_S
+
+/// Windows critical sections available?
+#cmakedefine01 HAVE_MSWIN_CRITICAL_SECTION
+
+/// Windows one-time initializers available?
+#cmakedefine01 HAVE_MSWIN_INIT_ONCE
+
+/// POSIX thread mutexes available?
+#cmakedefine01 HAVE_PTHREAD_MUTEX
+
+/// Windows _ftime_s() available?
+#cmakedefine01 HAVE__FTIME_S
+
+#endif /* end LL_FEATURES_H_ */
