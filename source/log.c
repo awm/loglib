@@ -72,8 +72,8 @@ static const char *write_timestamp
     *space -= n;
 
     // Write the fractional seconds.
-    n = snprintf(buffer + n, *space, ".%03u ", milliseconds);
-    if (n < 5 || n >= *space)
+    n = snprintf(buffer + n, *space, ".%03lu ", milliseconds);
+    if (n < 5 || n >= (int) *space)
     {
         return "No space for time stamp milliseconds!";
     }

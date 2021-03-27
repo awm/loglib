@@ -142,7 +142,7 @@ typedef struct _ll_mswin_mutex
 #           include <pthread.h>
 
 /// Mutex type.
-typedef pthread_mutex ll_mutex;
+typedef pthread_mutex_t ll_mutex;
 
 #       endif /* end HAVE_PTHREAD_MUTEX */
 #   endif /* end !LL_MUTEX_IMPLEMENTED */
