@@ -92,17 +92,17 @@ jobs:
         run:                cov-build --dir cov-int cmake --build . --config "${BUILD_TYPE}"
 
       # Package and upload the results to the Coverity scanner.
-      # - name:               Submit build results to Coverity Scan
-      #   working-directory:  ${{ github.workspace }}/repo/build
-      #   run: |
-      #     tar -vcaf results.tar.gz cov-int
-      #     curl                                                \
-      #       --form project='${{ github.repository }}'         \
-      #       --form token="${TOKEN}"                           \
-      #       --form email="${SCAN_OWNER}"                      \
-      #       --form version="$(basename '${{ github.ref }}')"  \
-      #       --form description='${{ github.sha }}'            \
-      #       --form file=@results.tar.gz                       \
-      #       https://scan.coverity.com/builds
-      #   env:
-      #     TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}
+      - name:               Submit build results to Coverity Scan
+        working-directory:  ${{ github.workspace }}/repo/build
+        run: |
+          tar -vcaf results.tar.gz cov-int
+          curl                                                \
+            --form project='${{ github.repository }}'         \
+            --form token="${TOKEN}"                           \
+            --form email="${SCAN_OWNER}"                      \
+            --form version="$(basename '${{ github.ref }}')"  \
+            --form description='${{ github.sha }}'            \
+            --form file=@results.tar.gz                       \
+            https://scan.coverity.com/builds
+        env:
+          TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}
