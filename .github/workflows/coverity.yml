@@ -33,7 +33,7 @@ jobs:
     runs-on:      ubuntu-latest
     steps:
       # Create cache for Coverity tarball.
-      - name: Cache Coverity Build Tool
+      - name: Coverity Build Tool cache
         id:   cache-coverity
         uses: actions/cache@v2
         with:
@@ -55,6 +55,8 @@ jobs:
             --output cov-analysis-linux64.md5
           echo ' *cov-analysis-linux64.tar.gz' >> cov-analysis-linux64.md5
           md5sum --check cov-analysis-linux64.md5
+          ls -la
+          pwd
         env:
           TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}
 
@@ -63,6 +65,8 @@ jobs:
         run: |
           mkdir cov-analysis-linux64
           tar -xaf cov-analysis-linux64.tar.gz --strip 1 -C cov-analysis-linux64
+          ls -la
+          pwd
 
       # Install build dependencies.
       - name: Install ninja-build tool
@@ -71,7 +75,11 @@ jobs:
       # Symlink ninja to ninja-build, as CMake needs that name to find it.
       - name:               Create ninja-build link
         working-directory:  ${{ github.workspace }}/ninja-build
-        run:                ln -s ninja ninja-build
+        run: |
+          ln -s ninja ninja-build
+          ls -la
+          pwd
+          ls -la ..
 
       # Check out the code.
       - name: Clone ${{ github.repository }}
@@ -86,6 +94,8 @@ jobs:
         working-directory:  ${{ github.workspace }}/build
         shell:              bash
         run: |
+          ls -la ..
+          pwd
           cmake --version
           echo "PATH=$PATH"
           ls -l '${{ github.workspace }}/ninja-build'
