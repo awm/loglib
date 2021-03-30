@@ -1,0 +1,108 @@
+
+#
+# @file       coverity.yml
+# @copyright  2021 Andrew MacIsaac
+# @remark
+#      SPDX-License-Identifier: BSD-2-Clause
+#
+# @brief      GitHub workflow for running Coverity scan on the scan branch.
+#
+# This workflow is based in part on the workflow developed for Ruby (see
+# https://github.com/ruby/actions-coverity-scan/blob/master/.github/workflows/coverity-scan.yml).
+#
+name: Coverity
+
+# Run the scan whenever new content is pushed to the scan branch.
+on:
+  push:
+    branches:
+      - coverity-scan
+
+# Configure job environment.
+env:
+  # Scan owner's email.
+  SCAN_OWNER: macisaac.andrew@gmail.com
+  # Set CMake build type.
+  BUILD_TYPE: Release
+
+# Install and run Coverity scanner.
+jobs:
+  scan-linux:
+    name:         Scan (Linux)
+    environment:  coverity-scan
+    runs-on:      ubuntu-latest
+    steps:
+      # Create cache for Coverity tarball.
+      - name: Cache Coverity Build Tool
+        id:   cache-coverity
+        uses: actions/cache@v2
+        with:
+          path: cov-analysis-linux64.tar.gz
+          key:  ${{ runner.os }}-${{ hashFiles('cov-analysis-linux64.tar.gz') }}
+
+      # Download Coverity tarball.
+      - name: Download Coverity Build Tool
+        if:   steps.cache-coverity.outputs.cache-hit != 'true'
+        run: |
+          curl https://scan.coverity.com/download/cxx/linux64 \
+            --form project='${{ github.repository }}'         \
+            --form token="${TOKEN}"                           \
+            --output cov-analysis-linux64.tar.gz
+          curl https://scan.coverity.com/download/cxx/linux64 \
+            --form project='${{ github.repository }}'         \
+            --form token="${TOKEN}"                           \
+            --form md5=1                                      \
+            --output cov-analysis-linux64.md5
+          echo ' *cov-analysis-linux64.tar.gz' >> cov-analysis-linux64.md5
+          md5sum --check cov-analysis-linux64.md5
+        env:
+          TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}
+
+      # Install the Coverity tools.
+      - name: Install Coverity Build Tool
+        run: |
+          mkdir cov-analysis-linux64
+          tar -xaf cov-analysis-linux64.tar.gz --strip 1 -C cov-analysis-linux64
+
+      # Install build dependencies.
+      - name: Install ninja-build tool
+        uses: seanmiddleditch/gha-setup-ninja@v3
+
+      # Check out the code.
+      - name: Clone ${{ github.repository }}
+        uses: actions/checkout@v2
+
+      # Create build directory.
+      - name: Create build environment
+        run:  cmake -E make_directory '${{ github.workspace }}/build'
+
+      # Run CMake configuration.
+      - name:               Configure CMake
+        working-directory:  ${{ github.workspace }}/build
+        shell:              bash
+        run: |
+          cmake '${{ github.workspace }}' -G Ninja -DCMAKE_BUILD_TYPE="${BUILD_TYPE}"
+
+      # Use the Coverity Build Tool to generate a scan result.
+      - name:               Build with Coverity Build
+        working-directory:  ${{ github.workspace }}/build
+        shell:              bash
+        run: |
+          export PATH="${{ github.workspace }}/cov-analysis-linux64/bin:${PATH}"
+          cov-build --dir cov-int cmake --build . --config "${BUILD_TYPE}"
+
+      # Package and upload the results to the Coverity scanner.
+      - name:               Submit build results to Coverity Scan
+        working-directory:  ${{ github.workspace }}/build
+        run: |
+          tar -vcaf results.tar.gz cov-int
+          curl                                                \
+            --form project='${{ github.repository }}'         \
+            --form token="${TOKEN}"                           \
+            --form email="${SCAN_OWNER}"                      \
+            --form version="$(basename '${{ github.ref }}')"  \
+            --form description='${{ github.sha }}'            \
+            --form file=@results.tar.gz                       \
+            https://scan.coverity.com/builds
+        env:
+          TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}
