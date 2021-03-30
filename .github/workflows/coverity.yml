@@ -55,8 +55,6 @@ jobs:
             --output cov-analysis-linux64.md5
           echo ' *cov-analysis-linux64.tar.gz' >> cov-analysis-linux64.md5
           md5sum --check cov-analysis-linux64.md5
-          ls -la
-          pwd
         env:
           TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}
 
@@ -65,62 +63,46 @@ jobs:
         run: |
           mkdir cov-analysis-linux64
           tar -xaf cov-analysis-linux64.tar.gz --strip 1 -C cov-analysis-linux64
-          ls -la
-          pwd
+          echo '${{ github.workspace }}/cov-analysis-linux64/bin' >> $GITHUB_PATH
 
       # Install build dependencies.
       - name: Install ninja-build tool
         uses: seanmiddleditch/gha-setup-ninja@v3
 
-      # Symlink ninja to ninja-build, as CMake needs that name to find it.
-      - name:               Create ninja-build link
-        working-directory:  ${{ github.workspace }}/ninja-build
-        run: |
-          ln -s ninja ninja-build
-          ls -la
-          pwd
-          ls -la ..
-
       # Check out the code.
       - name: Clone ${{ github.repository }}
         uses: actions/checkout@v2
+        with:
+          path: repo
 
       # Create build directory.
       - name: Create build environment
-        run:  cmake -E make_directory '${{ github.workspace }}/build'
+        run:  cmake -E make_directory '${{ github.workspace }}/repo/build'
 
       # Run CMake configuration.
       - name:               Configure CMake
-        working-directory:  ${{ github.workspace }}/build
+        working-directory:  ${{ github.workspace }}/repo/build
         shell:              bash
-        run: |
-          ls -la ..
-          pwd
-          cmake --version
-          echo "PATH=$PATH"
-          ls -l '${{ github.workspace }}/ninja-build'
-          cmake '${{ github.workspace }}' --log-level=VERBOSE -G Ninja -DCMAKE_BUILD_TYPE="${BUILD_TYPE}"
+        run:                cmake .. -G Ninja -DCMAKE_BUILD_TYPE="${BUILD_TYPE}"
 
       # Use the Coverity Build Tool to generate a scan result.
       - name:               Build with Coverity Build
-        working-directory:  ${{ github.workspace }}/build
+        working-directory:  ${{ github.workspace }}/repo/build
         shell:              bash
-        run: |
-          export PATH="${{ github.workspace }}/cov-analysis-linux64/bin:${PATH}"
-          cov-build --dir cov-int cmake --build . --config "${BUILD_TYPE}"
+        run:                cov-build --dir cov-int cmake --build . --config "${BUILD_TYPE}"
 
       # Package and upload the results to the Coverity scanner.
-      - name:               Submit build results to Coverity Scan
-        working-directory:  ${{ github.workspace }}/build
-        run: |
-          tar -vcaf results.tar.gz cov-int
-          curl                                                \
-            --form project='${{ github.repository }}'         \
-            --form token="${TOKEN}"                           \
-            --form email="${SCAN_OWNER}"                      \
-            --form version="$(basename '${{ github.ref }}')"  \
-            --form description='${{ github.sha }}'            \
-            --form file=@results.tar.gz                       \
-            https://scan.coverity.com/builds
-        env:
-          TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}
+      # - name:               Submit build results to Coverity Scan
+      #   working-directory:  ${{ github.workspace }}/repo/build
+      #   run: |
+      #     tar -vcaf results.tar.gz cov-int
+      #     curl                                                \
+      #       --form project='${{ github.repository }}'         \
+      #       --form token="${TOKEN}"                           \
+      #       --form email="${SCAN_OWNER}"                      \
+      #       --form version="$(basename '${{ github.ref }}')"  \
+      #       --form description='${{ github.sha }}'            \
+      #       --form file=@results.tar.gz                       \
+      #       https://scan.coverity.com/builds
+      #   env:
+      #     TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}
