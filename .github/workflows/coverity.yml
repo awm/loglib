@@ -69,7 +69,7 @@ jobs:
         uses: seanmiddleditch/gha-setup-ninja@v3
 
       # Symlink ninja to ninja-build, as CMake needs that name to find it.
-      - name:               Create ninja-uild link
+      - name:               Create ninja-build link
         working-directory:  ${{ github.workspace }}/ninja-build
         run:                ln -s ninja ninja-build
 
@@ -87,7 +87,8 @@ jobs:
         shell:              bash
         run: |
           cmake --version
-          cmake '${{ github.workspace }}' -G Ninja -DCMAKE_BUILD_TYPE="${BUILD_TYPE}"
+          which -a ninja ninja-build
+          cmake '${{ github.workspace }}' --log-level=VERBOSE -G Ninja -DCMAKE_BUILD_TYPE="${BUILD_TYPE}"
 
       # Use the Coverity Build Tool to generate a scan result.
       - name:               Build with Coverity Build
