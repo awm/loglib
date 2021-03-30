@@ -87,7 +87,7 @@ jobs:
         shell:              bash
         run: |
           cmake --version
-          which -a ninja ninja-build
+          echo "PATH=$PATH"
           cmake '${{ github.workspace }}' --log-level=VERBOSE -G Ninja -DCMAKE_BUILD_TYPE="${BUILD_TYPE}"
 
       # Use the Coverity Build Tool to generate a scan result.
