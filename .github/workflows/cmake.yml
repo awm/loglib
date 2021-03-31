@@ -29,17 +29,8 @@ jobs:
     name:     Standard Build (Linux)
     runs-on:  ubuntu-latest
     steps:
-      # Create cache for Ninja.
-      - name: Ninja cache
-        id:   cache-ninja
-        uses: actions/cache@v2
-        with:
-          path: ninja-build
-          key:  ninja-${{ runner.os }}-${{ hashFiles('ninja-build/ninja') }}
-
       # Install Ninja.
       - name: Install ninja-build tool
-        if:   steps.cache-ninja.outputs.cache-hit != 'true'
         uses: seanmiddleditch/gha-setup-ninja@v3
 
       # Check out the code.
