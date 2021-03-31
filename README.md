@@ -1,8 +1,17 @@
 # loglib
 
-![GitHub](https://img.shields.io/github/license/awm/loglib)
-![Quality](https://img.shields.io/badge/quality-unstable-red)
-![GitHub Workflow Status](https://img.shields.io/github/workflow/status/awm/loglib/CMake)
+[![License][license-img]][license-link]
+![Quality][quality-img]
+[![CMake][cmake-img]][cmake-link]
+[![Coverity][coverity-img]][coverity-link]
+
+[license-img]:   https://img.shields.io/github/license/awm/loglib "License"
+[license-link]:  https://github.com/awm/loglib/blob/main/LICENSE.txt
+[quality-img]:   https://img.shields.io/badge/quality-unstable-red "Quality"
+[cmake-img]:     https://github.com/awm/loglib/actions/workflows/cmake.yml/badge.svg "CMake Status"
+[cmake-link]:    https://github.com/awm/loglib/actions/workflows/cmake.yml?query=branch%3Amain
+[coverity-img]:  https://img.shields.io/coverity/scan/22867 "Coverity Scan"
+[coverity-link]: https://scan.coverity.com/projects/awm-loglib
 
 A configurable, embeddable logging framework.
 

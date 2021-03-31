@@ -1,46 +1,93 @@
+#
+# @file        cmake.yml
+# @copyright   2021 Andrew MacIsaac
+# @remark
+#      SPDX-License-Identifier: BSD-2-Clause
+#
+# @brief       Standard CMake build workflow for loglib pushes and PRs.
+#
 name: CMake
 
-on: [push]
+# Trigger normal CMake builds for all branches except coverity-scan on push and PR.  The Coverity
+# branch has its own build and doesn't need to also run the default CMake one.
+on:
+  push:
+    branches-ignore:
+      - coverity-scan
+  pull_request:
+    branches-ignore:
+      - coverity-scan
 
 env:
-  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  # Set CMake build type.
   BUILD_TYPE: Release
 
+# Run the default builds for each platform.
 jobs:
-  build:
-    # The CMake configure and build commands are platform agnostic and should work equally
-    # well on Windows or Mac.  You can convert this to a matrix build if you need
-    # cross-platform coverage.
-    # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
-    runs-on: ubuntu-latest
-
+  # Default Linux build.
+  linux:
+    name:     Standard Build (Linux)
+    runs-on:  ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+      # Create cache for Ninja.
+      - name: Ninja cache
+        id:   cache-ninja
+        uses: actions/cache@v2
+        with:
+          path: ninja-build
+          key:  ninja-${{ runner.os }}-${{ hashFiles('ninja-build/ninja') }}
 
-    - name: Create Build Environment
-      # Some projects don't allow in-source building, so create a separate build directory
-      # We'll use this as our working directory for all subsequent commands
-      run: cmake -E make_directory ${{github.workspace}}/build
+      # Install Ninja.
+      - name: Install ninja-build tool
+        if:   steps.cache-ninja.outputs.cache-hit != 'true'
+        uses: seanmiddleditch/gha-setup-ninja@v3
 
-    - name: Configure CMake
-      # Use a bash shell so we can use the same syntax for environment variable
-      # access regardless of the host operating system
-      shell: bash
-      working-directory: ${{github.workspace}}/build
-      # Note the current convention is to use the -S and -B options here to specify source 
-      # and build directories, but this is only available with CMake 3.13 and higher.  
-      # The CMake binaries on the Github Actions machines are (as of this writing) 3.12
-      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+      # Check out the code.
+      - name: Clone ${{ github.repository }}
+        uses: actions/checkout@v2
+        with:
+          path: repo
 
-    - name: Build
-      working-directory: ${{github.workspace}}/build
-      shell: bash
-      # Execute the build.  You can specify a specific target with "--target <NAME>"
-      run: cmake --build . --config $BUILD_TYPE
+      # Create build directory.
+      - name: Create build environment
+        run:  cmake -E make_directory '${{ github.workspace }}/repo/build'
 
-    - name: Test
-      working-directory: ${{github.workspace}}/build
-      shell: bash
-      # Execute tests defined by the CMake configuration.  
-      # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
-      run: ctest -C $BUILD_TYPE
+      # Run CMake configuration.
+      - name:               Configure CMake
+        working-directory:  ${{ github.workspace }}/repo/build
+        shell:              bash
+        run:                cmake .. -G Ninja -DCMAKE_BUILD_TYPE="${BUILD_TYPE}"
+
+      # Use the Coverity Build Tool to generate a scan result.
+      - name:               Build library
+        working-directory:  ${{ github.workspace }}/repo/build
+        shell:              bash
+        run:                cmake --build . --config "${BUILD_TYPE}"
+
+  # Default Windows build.
+  mswin:
+    name:     Standard Build (Windows)
+    runs-on:  windows-latest
+    steps:
+      # Check out the code.
+      - name: Clone ${{ github.repository }}
+        uses: actions/checkout@v2
+        with:
+          path: repo
+
+      # Create build directory.
+      - name: Create build environment
+        run:  cmake -E make_directory '${{ github.workspace }}/repo/build'
+
+      # Run CMake configuration.
+      - name:               Configure CMake
+        working-directory:  ${{ github.workspace }}/repo/build
+        shell:              bash
+        run: |
+          cmake .. -G 'Visual Studio 16 2019' -A x64 -DCMAKE_BUILD_TYPE="${BUILD_TYPE}"
+
+      # Use the Coverity Build Tool to generate a scan result.
+      - name:               Build library
+        working-directory:  ${{ github.workspace }}/repo/build
+        shell:              bash
+        run:                cmake --build . --config "${BUILD_TYPE}"
