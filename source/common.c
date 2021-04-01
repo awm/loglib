@@ -83,6 +83,7 @@ struct ll_target *get_targets(struct ll_log *log, struct ll_log **owner)
         // Leave owner locked when we return so that target list cannot change, the caller is
         // responsible for unlocking.
         *owner = log;
+        // coverity[missing_unlock]
         return log->targets;
     }
     UNLOCK(log);
