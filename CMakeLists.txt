@@ -6,7 +6,7 @@
 #
 # @brief       Root build definition file for loglib.
 #
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.19)
 project(loglib LANGUAGES C)
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
@@ -16,10 +16,15 @@ include(CTest)
 # Configure basic C compiler settings.
 set(CMAKE_C_STANDARD 99)
 set(GNU_LIKE GNU Clang AppleClang)
+set(STATIC_ANALYSIS OFF CACHE BOOL "Enable static analysis features")
+
 if (CMAKE_C_COMPILER_ID IN_LIST GNU_LIKE)
     add_compile_options(-Wall -Wextra -Werror)
 elseif (MSVC)
     add_compile_options(/W4 /WX)
+    if (STATIC_ANALYSIS)
+        add_compile_options(/analyze /analyze:log static-analysis.xml)
+    endif()
 endif()
 
 # Add subdirectories.

@@ -1,15 +1,15 @@
 #
-# @file        cmake.yml
+# @file        static-analysis.yml
 # @copyright   2021 Andrew MacIsaac
 # @remark
 #      SPDX-License-Identifier: BSD-2-Clause
 #
-# @brief       Standard CMake build workflow for loglib pushes and PRs.
+# @brief       Clang and VS static analysis workflow.
 #
-name: CMake
+name: Static Analysis
 
-# Trigger normal CMake builds for all branches except coverity-scan on push and PR.  The Coverity
-# branch has its own build and doesn't need to also run the default CMake one.
+# Trigger analysis for all branches except coverity-scan on push and PR.  The Coverity branch has
+# its own build and doesn't need to also run this analysis.
 on:
   push:
     branches-ignore:
@@ -20,13 +20,13 @@ on:
 
 env:
   # Set CMake build type.
-  BUILD_TYPE: Release
+  BUILD_TYPE: Debug
 
-# Run the default builds for each platform.
+# Run analysis on selected platforms.
 jobs:
-  # Default Linux build.
-  linux:
-    name:     Standard Build (Linux)
+  # Linux analysis using Clang Static Analyzer.
+  analysis-linux:
+    name:     Clang Static Analyzer (Linux)
     runs-on:  ubuntu-latest
     steps:
       # Install Ninja.
@@ -47,17 +47,25 @@ jobs:
       - name:               Configure CMake
         working-directory:  ${{ github.workspace }}/repo/build
         shell:              bash
-        run:                cmake .. -G Ninja -DCMAKE_BUILD_TYPE="${BUILD_TYPE}"
+        run: |
+          scan-build -o static-analysis cmake .. -G Ninja -DCMAKE_BUILD_TYPE="${BUILD_TYPE}"
 
-      # Use the Coverity Build Tool to generate a scan result.
+      # Build the library.
       - name:               Build library
         working-directory:  ${{ github.workspace }}/repo/build
         shell:              bash
-        run:                cmake --build . --config "${BUILD_TYPE}"
+        run:                scan-build -o static-analysis cmake --build . --config "${BUILD_TYPE}"
 
-  # Default Windows build.
-  mswin:
-    name:     Standard Build (Windows)
+      # Collect the results.
+      - name: Collect analysis results
+        uses: actions/upload-artifact@v2
+        with:
+          name: Clang Static Analysis
+          path: ${{ github.workspace }}/repo/build/static-analysis
+
+  # Windows analysis using Visual Studio.
+  analysis-mswin:
+    name:     Visual Studio Analyzer (Windows)
     runs-on:  windows-latest
     steps:
       # Check out the code.
@@ -74,10 +82,17 @@ jobs:
       - name:               Configure CMake
         working-directory:  ${{ github.workspace }}/repo/build
         shell:              bash
-        run:                cmake .. -G 'Visual Studio 16 2019' -A x64
+        run:                cmake .. -G 'Visual Studio 16 2019' -A x64 -DSTATIC_ANALYSIS=ON
 
       # Build the library.
       - name:               Build library
         working-directory:  ${{ github.workspace }}/repo/build
         shell:              bash
         run:                cmake --build . --config "${BUILD_TYPE}"
+
+      # Collect the results.
+      - name: Collect analysis results
+        uses: actions/upload-artifact@v2
+        with:
+          name: Visual Studio Static Analysis
+          path: ${{ github.workspace }}/repo/build/static-analysis.xml

@@ -23,7 +23,7 @@ env:
   # Scan owner's email.
   SCAN_OWNER: macisaac.andrew@gmail.com
   # Set CMake build type.
-  BUILD_TYPE: Release
+  BUILD_TYPE: Debug
 
 # Install and run Coverity scanner.
 jobs:
