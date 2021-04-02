@@ -54,14 +54,17 @@ jobs:
       - name:               Build library
         working-directory:  ${{ github.workspace }}/repo/build
         shell:              bash
-        run:                scan-build -o static-analysis cmake --build . --config "${BUILD_TYPE}"
+        run: |
+          scan-build --status-bugs -o static-analysis cmake --build . --config "${BUILD_TYPE}"
 
       # Collect the results.
       - name: Collect analysis results
         uses: actions/upload-artifact@v2
+        if:   failure()
         with:
-          name: Clang Static Analysis
-          path: ${{ github.workspace }}/repo/build/static-analysis
+          name:               Clang Static Analysis
+          path:               ${{ github.workspace }}/repo/build/static-analysis
+          if-no-files-found:  error
 
   # Windows analysis using Visual Studio.
   analysis-mswin:
@@ -93,6 +96,8 @@ jobs:
       # Collect the results.
       - name: Collect analysis results
         uses: actions/upload-artifact@v2
+        if:   failure()
         with:
-          name: Visual Studio Static Analysis
-          path: ${{ github.workspace }}/repo/build/**/*.pftlog
+          name:               Visual Studio Static Analysis
+          path:               ${{ github.workspace }}/repo/build/**/*.pftlog
+          if-no-files-found:  error
