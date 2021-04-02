@@ -29,9 +29,9 @@ jobs:
     name:     Standard Build (Linux)
     runs-on:  ubuntu-latest
     steps:
-      # Install Ninja.
-      - name: Install ninja-build tool
-        uses: seanmiddleditch/gha-setup-ninja@v3
+      # Install dependencies.
+      - name: Install apt dependencies
+        run:  sudo apt-get install -y ninja-build
 
       # Check out the code.
       - name: Clone ${{ github.repository }}

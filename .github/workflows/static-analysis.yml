@@ -29,9 +29,9 @@ jobs:
     name:     Clang Static Analyzer (Linux)
     runs-on:  ubuntu-latest
     steps:
-      # Install Ninja.
-      - name: Install ninja-build tool
-        uses: seanmiddleditch/gha-setup-ninja@v3
+      # Install apt dependencies.
+      - name: Install apt dependencies
+        run:  sudo apt-get install -y clang-tools ninja-build
 
       # Check out the code.
       - name: Clone ${{ github.repository }}
@@ -95,4 +95,4 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: Visual Studio Static Analysis
-          path: ${{ github.workspace }}/repo/build/static-analysis.xml
+          path: ${{ github.workspace }}/repo/build/**/*.pftlog
